@@ -1,0 +1,6 @@
+{
+  "name": "Explorer 32",
+  "description": "A native file explorer for Android 8.1 (32-bit supported).",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
