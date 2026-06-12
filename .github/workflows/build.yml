@@ -10,30 +10,13 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      # התיקון כאן בשורה 12 והלאה - הוסדר מבנה הפקודה בצורה תקינה
+      # מרוקנים לחלוטין את הקובץ הראשי כדי שלא יתנגש עם הגדרות ה-settings של הפרויקט
       - name: Force Fix Android Project Structure
         run: |
-          # יצירת קובץ build.gradle.kts ראשי חדש ותקין לחלוטין בלי אף פלאגין שבור
-          cat << 'EOF' > build.gradle.kts
-          buildscript {
-              repositories {
-                  google()
-                  mavenCentral()
-              }
-              dependencies {
-                  classpath("com.android.tools.build:gradle:8.2.2")
-                  classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:1.9.23")
-              }
-          }
-          allprojects {
-              repositories {
-                  google()
-                  mavenCentral()
-              }
-          }
-          EOF
+          # יצירת קובץ ראשי ריק לחלוטין כדי למנוע את שגיאת ה-Settings Repositories
+          echo "" > build.gradle.kts
 
-          # ניקוי יסודי של הפלאגין הבעייתי גם מתוך קובץ ה-app/build.gradle.kts הפנימי
+          # ניקוי הפלאגין הבעייתי רק מהקובץ הפנימי של האפליקציה במידה והוא שם
           if [ -f app/build.gradle.kts ]; then
             sed -i '/org.jetbrains.kotlin.plugin.compose/d' app/build.gradle.kts || true
           fi
@@ -51,14 +34,14 @@ jobs:
           gradle-version: '8.4'
           cache-disabled: true
 
-      # יצירת ה-Wrapper על קבצים נקיים
+      # יצירת ה-Wrapper
       - name: Generate Gradle Wrapper
         run: gradle wrapper --gradle-version 8.4
 
       - name: Grant Execute Permissions
         run: chmod +x gradlew
 
-      # קימפול נקי
+      # קימפול ה-APK
       - name: Compile APK
         run: ./gradlew assembleDebug --no-daemon
 
