@@ -1,7 +1,7 @@
 name: Build Android Native APK
 on:
   push:
-    branches: [ main ] # שנה ל-master אם זה שם הענף הראשי שלך
+    branches: [ main, master ]
 
 jobs:
   build:
@@ -18,12 +18,11 @@ jobs:
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v3
+        with:
+          gradle-version: '8.4' # מגדיר גרסת Gradle מובנית ישירות בענן
 
-      - name: Grant execute permission for gradlew
-        run: chmod +x gradlew
-
-      - name: Build with Gradle
-        run: ./gradlew assembleDebug # מייצר APK לבדיקה (Debug) ללא צורך בחתימה רשמית
+      - name: Build with Global Gradle
+        run: gradle assembleDebug # מריץ את הקימפול באמצעות Gradle הגלובלי ולא דרך gradlew החסר
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
