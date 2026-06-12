@@ -10,34 +10,33 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      # שלב 1: מנקים ומסדרים את קבצי הפרויקט הבעייתיים לפני שום פקודת Gradle
-      # אנחנו דורסים את קובץ ה-build.gradle.kts הראשי ומנקים את התיקייה הפנימית
-      name: Force Fix Android Project Structure
-      run: |
-        # יצירת קובץ build.gradle.kts ראשי חדש ותקין לחלוטין בלי אף פלאגין שבור
-        cat << 'EOF' > build.gradle.kts
-        buildscript {
-            repositories {
-                google()
-                mavenCentral()
-            }
-            dependencies {
-                classpath("com.android.tools.build:gradle:8.2.2")
-                classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:1.9.23")
-            }
-        }
-        allprojects {
-            repositories {
-                google()
-                mavenCentral()
-            }
-        }
-        EOF
+      # התיקון כאן בשורה 12 והלאה - הוסדר מבנה הפקודה בצורה תקינה
+      - name: Force Fix Android Project Structure
+        run: |
+          # יצירת קובץ build.gradle.kts ראשי חדש ותקין לחלוטין בלי אף פלאגין שבור
+          cat << 'EOF' > build.gradle.kts
+          buildscript {
+              repositories {
+                  google()
+                  mavenCentral()
+              }
+              dependencies {
+                  classpath("com.android.tools.build:gradle:8.2.2")
+                  classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:1.9.23")
+              }
+          }
+          allprojects {
+              repositories {
+                  google()
+                  mavenCentral()
+              }
+          }
+          EOF
 
-        # ניקוי יסודי של הפלאגין הבעייתי גם מתוך קובץ ה-app/build.gradle.kts הפנימי
-        if [ -f app/build.gradle.kts ]; then
-          sed -i '/org.jetbrains.kotlin.plugin.compose/d' app/build.gradle.kts || true
-        fi
+          # ניקוי יסודי של הפלאגין הבעייתי גם מתוך קובץ ה-app/build.gradle.kts הפנימי
+          if [ -f app/build.gradle.kts ]; then
+            sed -i '/org.jetbrains.kotlin.plugin.compose/d' app/build.gradle.kts || true
+          fi
 
       - name: Set up JDK 17
         uses: actions/setup-java@v4
@@ -45,21 +44,21 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      # שלב 2: הגדרת גרסת גראדל תואמת
+      # הגדרת גרסת גראדל תואמת
       - name: Setup Gradle 8.4
         uses: gradle/actions/setup-gradle@v3
         with:
           gradle-version: '8.4'
           cache-disabled: true
 
-      # שלב 3: יצירת ה-Wrapper על קבצים נקיים
+      # יצירת ה-Wrapper על קבצים נקיים
       - name: Generate Gradle Wrapper
         run: gradle wrapper --gradle-version 8.4
 
       - name: Grant Execute Permissions
         run: chmod +x gradlew
 
-      # שלב 4: קימפול נקי
+      # קימפול נקי
       - name: Compile APK
         run: ./gradlew assembleDebug --no-daemon
 
