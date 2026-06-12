@@ -13,11 +13,11 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      # הפקודה הזו מוחקת לצמיתות את השורה הבעייתית מקובץ ה-Build לפני הריצה
-      - name: Clean Broken Code Line
+      # הפקודה הזו סורקת את כל הפרויקט, מוצאת כל קובץ gradle ומוחקת ממנו את השורה הדפוקה
+      - name: Nuclear Clean Broken Line
         run: |
-          sed -i '/org.jetbrains.kotlin.plugin.compose/d' build.gradle.kts || true
-          sed -i '/org.jetbrains.kotlin.plugin.compose/d' app/build.gradle.kts || true
+          find . -name "*.gradle.kts" -type f -exec sed -i '/org.jetbrains.kotlin.plugin.compose/d' {} + || true
+          find . -name "*.gradle" -type f -exec sed -i '/org.jetbrains.kotlin.plugin.compose/d' {} + || true
 
       - name: Build with Gradle
         run: |
