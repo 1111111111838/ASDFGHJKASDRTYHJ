@@ -16,21 +16,20 @@ jobs:
           distribution: 'zulu'
           java-version: '17'
 
-      # מייצרים Wrapper תואם לגרסה יציבה ומודרנית
       - name: Generate Gradle Wrapper
         run: |
-          gradle wrapper --gradle-version 8.7
+          gradle wrapper --gradle-version 8.4
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v3
         with:
           cache-disabled: true
 
-      # פקודה חכמה שמתקנת אוטומטית את גרסת פלאגין הקומפוז השגויה במידה וקיימת בקובץ
-      - name: Fix Compose Plugin Version
+      # הסרת שורת הפלאגין הבעייתי מהקובץ הראשי כדי למנוע את קריסת הסנכרון
+      - name: Remove Broken Compose Plugin
         run: |
-          sed -i "s/id(\"org.jetbrains.kotlin.plugin.compose\").version(\"1.9.23\")/id(\"org.jetbrains.kotlin.plugin.compose\").version(\"2.0.0\")/g" build.gradle.kts || true
-          sed -i "s/id 'org.jetbrains.kotlin.plugin.compose' version '1.9.23'/id 'org.jetbrains.kotlin.plugin.compose' version '2.0.0'/g" build.gradle.kts || true
+          sed -i '/org.jetbrains.kotlin.plugin.compose/d' build.gradle.kts || true
+          sed -i '/org.jetbrains.kotlin.plugin.compose/d' app/build.gradle.kts || true
 
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
