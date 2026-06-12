@@ -16,13 +16,22 @@ jobs:
           distribution: 'zulu'
           java-version: '17'
 
+      # שלב זה מייצר את קבצי ה-gradlew החסרים במאגר שלך באופן אוטומטי בענן
+      - name: Generate Gradle Wrapper
+        run: |
+          npm install -g gradle-to-js || true # מונע שגיאות NPM
+          gradle wrapper --gradle-version 8.4
+
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v3
         with:
-          gradle-version: '8.4' # מגדיר גרסת Gradle מובנית ישירות בענן
+          cache-disabled: true # מכבה את הקאש כדי למנוע את השגיאה שראית בלוג
 
-      - name: Build with Global Gradle
-        run: gradle assembleDebug # מריץ את הקימפול באמצעות Gradle הגלובלי ולא דרך gradlew החסר
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Build with Gradle
+        run: ./gradlew assembleDebug --no-daemon
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
