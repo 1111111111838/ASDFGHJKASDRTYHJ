@@ -1,0 +1,32 @@
+name: Build Android Native APK
+on:
+  push:
+    branches: [ main ] # שנה ל-master אם זה שם הענף הראשי שלך
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Build with Gradle
+        run: ./gradlew assembleDebug # מייצר APK לבדיקה (Debug) ללא צורך בחתימה רשמית
+
+      - name: Upload APK Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: file-explorer-apk
+          path: app/build/outputs/apk/debug/app-debug.apk
