@@ -2,28 +2,47 @@ name: Build APK
 on:
   push:
     branches: [ main, master ]
+
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      
-      - uses: actions/setup-java@v4
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '17'
 
-      # הפקודה הזו סורקת את כל הפרויקט, מוצאת כל קובץ gradle ומוחקת ממנו את השורה הדפוקה
-      - name: Nuclear Clean Broken Line
+      # כלי רשמי של גיטהאב שמוריד ומגדיר את הגרסה המדויקת של Gradle (גרסה 8.4)
+      # זה מונע מגיטהאב להשתמש בגרסה 9.5.1 ההרסנית שראינו בלוגים
+      - name: Setup Gradle 8.4 Explicitly
+        uses: gradle/actions/setup-gradle@v3
+        with:
+          gradle-version: '8.4'
+          cache-disabled: true # מונע את שגיאות השרת/סינון שראינו בלוג 2
+
+      # יצירת ה-Wrapper מתוך הגרסה המבודדת והנכונה
+      - name: Generate Proper Gradle Wrapper
+        run: gradle wrapper --gradle-version 8.4
+
+      # תיקון פיזי של הקבצים: מחיקת השורה הבעייתית מכל מקום אפשרי במאגר
+      - name: Fix Project Files
         run: |
           find . -name "*.gradle.kts" -type f -exec sed -i '/org.jetbrains.kotlin.plugin.compose/d' {} + || true
           find . -name "*.gradle" -type f -exec sed -i '/org.jetbrains.kotlin.plugin.compose/d' {} + || true
 
-      - name: Build with Gradle
-        run: |
-          gradle assembleDebug --no-daemon
-          
-      - uses: actions/upload-artifact@v4
+      - name: Grant Execute Permissions
+        run: chmod +x gradlew
+
+      # הרצה ישירה דרך ה-Wrapper הנכון, בלי תהליכי רקע ובלי פרוקסי משובש
+      - name: Compile APK
+        run: ./gradlew assembleDebug --no-daemon --stacktrace
+
+      - name: Upload Finished APK
+        uses: actions/upload-artifact@v4
         with:
           name: my-app-apk
           path: "**/build/outputs/apk/debug/*.apk"
