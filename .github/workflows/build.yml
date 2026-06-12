@@ -7,13 +7,22 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      
       - uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '17'
+
+      # הפקודה הזו מוחקת לצמיתות את השורה הבעייתית מקובץ ה-Build לפני הריצה
+      - name: Clean Broken Code Line
+        run: |
+          sed -i '/org.jetbrains.kotlin.plugin.compose/d' build.gradle.kts || true
+          sed -i '/org.jetbrains.kotlin.plugin.compose/d' app/build.gradle.kts || true
+
       - name: Build with Gradle
         run: |
           gradle assembleDebug --no-daemon
+          
       - uses: actions/upload-artifact@v4
         with:
           name: my-app-apk
