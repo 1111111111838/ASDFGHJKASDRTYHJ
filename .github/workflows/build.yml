@@ -10,16 +10,15 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      # מרוקנים לחלוטין את הקובץ הראשי כדי שלא יתנגש עם הגדרות ה-settings של הפרויקט
+      # מנקים באופן אגרסיבי את הפלאגין השבור מכל קובץ פנימי או חיצוני בפרויקט
       - name: Force Fix Android Project Structure
         run: |
-          # יצירת קובץ ראשי ריק לחלוטין כדי למנוע את שגיאת ה-Settings Repositories
+          # ריקון הקובץ הראשי למניעת התנגשויות settings
           echo "" > build.gradle.kts
 
-          # ניקוי הפלאגין הבעייתי רק מהקובץ הפנימי של האפליקציה במידה והוא שם
-          if [ -f app/build.gradle.kts ]; then
-            sed -i '/org.jetbrains.kotlin.plugin.compose/d' app/build.gradle.kts || true
-          fi
+          # מחיקה טוטאלית של פלאגין הקומפוז השבור מכל קובץ הגדרות, בכל צורת כתיבה שהיא
+          find . -name "*.gradle.kts" -type f -exec sed -i '/plugin.compose/d' {} + || true
+          find . -name "*.gradle" -type f -exec sed -i '/plugin.compose/d' {} + || true
 
       - name: Set up JDK 17
         uses: actions/setup-java@v4
